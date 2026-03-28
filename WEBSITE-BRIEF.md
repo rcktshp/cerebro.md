@@ -109,8 +109,8 @@ Feature cards (icon + title + short description):
 
 **Step 1: Install**
 ```bash
-git clone https://github.com/cerebro-md/cerebro.git
-cd cerebro && bash install.sh
+git clone https://github.com/rcktshp/cerebro.md.git
+cd cerebro.md && bash install.sh
 ```
 Copies hooks and the slash command to all detected AI platforms.
 
@@ -272,8 +272,8 @@ Three cards:
 **Heading:** Get started in 2 minutes
 
 ```bash
-git clone https://github.com/cerebro-md/cerebro.git
-cd cerebro && bash install.sh
+git clone https://github.com/rcktshp/cerebro.md.git
+cd cerebro.md && bash install.sh
 ```
 
 Then type `/cerebro` in your AI assistant.
@@ -283,6 +283,7 @@ Then type `/cerebro` in your AI assistant.
 ### 12. Footer
 
 ```
+Created by Diego Martins (diegomartins.com)
 Copyright (c) 2026 CEREBRO.md by Martins LLC dba Rocketship
 For website terms of use, trademark policy, and other project policies,
 see rocketship.xyz

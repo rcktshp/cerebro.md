@@ -2,6 +2,8 @@
 
 **Your AI assistant's memory.** Cerebro is a persistent memory and session management system that works across AI coding assistants. It remembers what you worked on, tracks your sessions, and builds a searchable knowledge base — all stored locally on your machine.
 
+Created by [Diego Martins](https://www.diegomartins.com)
+
 ## Features
 
 - **Session Recording** — Automatically logs every prompt and response
@@ -17,8 +19,8 @@
 ## Quick Install
 
 ```bash
-git clone https://github.com/yourusername/cerebro.git
-cd cerebro
+git clone https://github.com/rcktshp/cerebro.md.git
+cd cerebro.md
 bash install.sh
 ```
 
