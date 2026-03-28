@@ -2,7 +2,7 @@
 
 **Your AI assistant's memory.** Cerebro is a persistent memory and session management system that works across AI coding assistants. It remembers what you worked on, tracks your sessions, and builds a searchable knowledge base — all stored locally on your machine.
 
-Created by [Diego Martins](https://www.diegomartins.com)
+Created by [Diego Martins](https://www.diegomartins.com) *_Personal project. Not affiliated with or endorsed by any employer_
 
 ## Features
 
@@ -114,8 +114,8 @@ Walks you through a clean removal with an option to export your data first.
 
 MIT — Copyright (c) 2026 CEREBRO.md by Martins LLC dba Rocketship. See [LICENSE](LICENSE).
 
-For website terms of use, trademark policy, and other project policies, see [rocketship.xyz](https://www.rocketship.xyz).
-
 ## Open Core
 
 Cerebro is free and open source for all personal and self-hosted team use. A paid tier for hosted team features, cloud sync, and advanced integrations is planned.
+
+**Personal project. Not affiliated with or endorsed by any employer**
