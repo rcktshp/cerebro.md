@@ -1,0 +1,38 @@
+{
+  "claude-code": {
+    "name": "Claude Code",
+    "memory_path": "~/.claude/projects/{project}/memory/MEMORY.md",
+    "commands_dir": "~/.claude/commands",
+    "settings_path": "~/.claude/settings.json",
+    "hooks_supported": true,
+    "hook_events": ["UserPromptSubmit", "Stop"],
+    "detection_path": "~/.claude"
+  },
+  "cursor": {
+    "name": "Cursor",
+    "memory_path": "~/.cursor/memory/",
+    "commands_dir": "~/.cursor/commands",
+    "settings_path": "~/.cursor/settings.json",
+    "hooks_supported": false,
+    "hook_events": [],
+    "detection_path": "~/.cursor"
+  },
+  "windsurf": {
+    "name": "Windsurf",
+    "memory_path": "~/.windsurf/memory/",
+    "commands_dir": "~/.windsurf/commands",
+    "settings_path": "~/.windsurf/settings.json",
+    "hooks_supported": false,
+    "hook_events": [],
+    "detection_path": "~/.windsurf"
+  },
+  "cline": {
+    "name": "Cline",
+    "memory_path": "~/.cline/memory/",
+    "commands_dir": "~/.cline/commands",
+    "settings_path": "~/.cline/settings.json",
+    "hooks_supported": false,
+    "hook_events": [],
+    "detection_path": "~/.cline"
+  }
+}
