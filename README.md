@@ -11,7 +11,7 @@ Created by [Diego Martins](https://www.diegomartins.com) *_Personal project. Not
 - **Knowledge Capture** — Notes, decisions, snippets, TILs, all searchable
 - **Memory Backup** — Syncs your platform memory to safe storage
 - **Token & Timing Tracking** — Know how long you spend and what it costs
-- **Multi-Platform** — Works with Claude Code, Cursor, Windsurf, and Cline
+- **Multi-Platform** — Works with Claude Code, Cursor, Windsurf, Cline, Codex CLI, Gemini CLI, and Google Antigravity
 - **Cross-OS** — macOS, Linux, and Windows
 - **Privacy First** — You own all your data. Full control over what's tracked. Anonymous and private modes available.
 - **Self-Updating** — `/cerebro update` pulls the latest version
@@ -74,6 +74,9 @@ All commands are invoked as `/cerebro <command>`.
 | Cursor | Yes | Limited | Supported |
 | Windsurf | Yes | Manual only | Supported |
 | Cline | Yes | Manual only | Supported |
+| Codex CLI | Yes | Manual only | Supported |
+| Gemini CLI | Yes (TOML) | Manual only | Supported |
+| Google Antigravity | Yes (skill plugin) | Manual only | Supported |
 
 ## Privacy
 

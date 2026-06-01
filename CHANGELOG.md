@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **Focus modes** — `goal` (track/complete goals), `blocked` (record/clear blockers), `pin` (pins + date-based reminders), and `checkin` (timestamped daily check-ins); `start` and `end` now read/update these files so the session loop is self-consistent
+- **Codex CLI** support — installs the `/cerebro` prompt as plain markdown at `~/.codex/prompts/cerebro.md` (commands-only; manual logging)
+- **Gemini CLI** support — installs the command as a TOML wrapper at `~/.gemini/commands/cerebro.toml`, converting `$ARGUMENTS` to `{{args}}` (commands-only; manual logging)
+- **Google Antigravity** support — installs as a plugin (`~/.gemini/config/plugins/cerebro/` with `plugin.json` + `skills/cerebro/SKILL.md`); model-activated skill, no plain-text memory file, manual logging
+
+### Fixed
+- Gemini CLI is now detected by its top-level `~/.gemini/settings.json` / `GEMINI.md` rather than the `~/.gemini` directory alone, which it shares with Google Antigravity (prevented a false-positive install on Antigravity machines)
+
 ## 0.1.0 — 2026-03-27
 
 ### Initial Release

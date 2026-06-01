@@ -14,7 +14,7 @@ If no argument is provided, check if `~/.cerebro/config.json` exists.
 
 Read all paths from `~/.cerebro/config.json`. If the config file exists, load it first before doing anything else. The config contains:
 - `cerebro_home` — where all Cerebro data is stored
-- `user` — name, role, tone, experience level, greeting style
+- `user` — name, role, tone, greeting style
 - `platforms` — installed platforms and their paths
 - `privacy` — what Cerebro is allowed to track
 - `context_sources` — folders Cerebro scans for project context
@@ -36,8 +36,7 @@ Then ask these questions one at a time (not all at once):
 2. "What do you do? (e.g., software engineer, designer, student, researcher)"
 3. "What do you mainly use your AI assistant for?"
 4. "How would you like me to address you? And do you prefer formal or casual communication?"
-5. "How would you describe your experience level? (beginner, intermediate, expert)"
-6. "How would you like me to communicate with you?"
+5. "How would you like me to communicate with you?"
    - **Concise** — short, direct, no fluff
    - **Conversational** — friendly and natural, like a colleague
    - **Detailed** — thorough explanations, step-by-step
@@ -78,6 +77,9 @@ Scan for all installed AI assistants by checking for their config directories:
 - `~/.cursor` → Cursor
 - `~/.windsurf` → Windsurf
 - `~/.cline` → Cline
+- `~/.gemini/settings.json` or `~/.gemini/GEMINI.md` → Gemini CLI (commands are TOML — install `cerebro.toml`, not `.md`; swap `$ARGUMENTS` → `{{args}}`). Detect by these top-level files, **not** the `~/.gemini` directory alone, which is shared with Antigravity.
+- `~/.codex` → Codex CLI (custom prompts live in `~/.codex/prompts/` as plain markdown, like Claude Code)
+- `~/.gemini/antigravity-cli` or `~/.gemini/antigravity` → Google Antigravity. Skills are plugin-packaged and model-activated (not literal slash commands), and it has no plain-text memory file and no logging hooks — so it is commands-only with **manual logging** and **memory sync is skipped**.
 
 Use `ls` or check directory existence. Read platform capabilities from `~/.cerebro/platform-defaults.json` (copied during install) or use the built-in defaults.
 
@@ -181,7 +183,10 @@ For platforms without hooks, explain:
 
 Copy `cerebro.md` into each selected platform's commands directory:
 - Claude Code: `~/.claude/commands/cerebro.md`
-- Others: their respective command directories
+- Codex CLI: `~/.codex/prompts/cerebro.md` (plain markdown)
+- Gemini CLI: `~/.gemini/commands/cerebro.toml` — wrap the markdown as a TOML `prompt` multiline string and replace `$ARGUMENTS` with `{{args}}`
+- Google Antigravity: package as a plugin — write `~/.gemini/config/plugins/cerebro/plugin.json` and `~/.gemini/config/plugins/cerebro/skills/cerebro/SKILL.md` (the `cerebro.md` body prefixed with YAML frontmatter: `name` + an activating `description`)
+- Cursor / Windsurf / Cline: `~/.<platform>/commands/cerebro.md`
 
 ### Step 9: Summary
 
@@ -235,8 +240,9 @@ Read config from `~/.cerebro/config.json`. Adapt tone to user preferences.
 - Check activity history — if there's an entry from exactly 1 week, 1 month, or 1 year ago, show it briefly
 
 ### 5. Pinned Items & Reminders
-- Show any pinned items
-- Show any reminders that are due today or overdue
+- Read `$CEREBRO_HOME/pins.md` (if missing, treat as empty)
+- Show all pinned items
+- For reminders (lines with `[due YYYY-MM-DD]`), highlight any due today or overdue
 - Show any pending mentions from team members
 
 ### 6. Load Memory
@@ -253,8 +259,8 @@ Read config from `~/.cerebro/config.json`. Adapt tone to user preferences.
 - Report any changes since last session
 
 ### 9. Active Goals & Blockers
-- Show any active goals
-- Show any unresolved blockers
+- Read `$CEREBRO_HOME/goals.md` and show unchecked `[ ]` goals (if missing, treat as empty)
+- Read `$CEREBRO_HOME/blockers.md` and show unresolved `[ ]` blockers (if missing, treat as empty)
 
 ### 10. Offer Context
 - Suggest continuing from the latest project
@@ -270,8 +276,8 @@ Run these steps in order. Do NOT ask for permission — just execute. Adapt tone
 - Summarize what was done in 3-8 bullet points
 
 ### 2. Goal Check
-- If there are active goals, ask: "Did you make progress on any of your goals?"
-- Update goal status based on response
+- Read `$CEREBRO_HOME/goals.md`; if there are unchecked `[ ]` goals, ask: "Did you make progress on any of your goals?"
+- Update goal status in `goals.md` based on the response (check the box for any completed; leave the rest)
 
 ### 3. Activity History
 - Read `$CEREBRO_HOME/activity-history.md`
@@ -282,7 +288,8 @@ Run these steps in order. Do NOT ask for permission — just execute. Adapt tone
 - Never overwrite — always append
 
 ### 4. Memory Sync
-- Copy the platform's memory file to `$CEREBRO_HOME/memory-backup.md`
+- Copy the platform's memory file (path from config) to `$CEREBRO_HOME/memory-backup.md`
+- If the platform has no plain-text memory file (`memory_path` is null, e.g. Antigravity), skip this step and note it in the confirmation
 
 ### 5. Confirmation
 - Print checklist of what was saved:
@@ -300,6 +307,81 @@ Quick capture. Append to `$CEREBRO_HOME/notes/YYYY-MM-DD.md`:
 ### HH:MM — <text>
 ```
 If the file doesn't exist, create it with a `# Notes: YYYY-MM-DD` header.
+
+---
+
+## Mode: `goal`
+
+Manage active goals. Stored in a single living file: `$CEREBRO_HOME/goals.md`.
+
+- `/cerebro goal "<text>"` — add a new active goal
+- `/cerebro goal` (no args) — list active goals, each with its index and creation date
+- `/cerebro goal done <n>` — mark goal #n complete (check the box, keep it in the file)
+- `/cerebro goal drop <n>` — remove goal #n entirely
+
+File format — a markdown checklist, newest at the bottom:
+```markdown
+# Goals
+
+- [ ] 2026-06-01 — Ship Cerebro focus modes
+- [x] 2026-05-20 — Write the onboarding flow
+```
+If the file doesn't exist, create it with a `# Goals` header. Never delete the file; `drop` removes a single line. When `start` lists goals, show only unchecked `[ ]` items.
+
+---
+
+## Mode: `blocked`
+
+Track blockers — things stopping forward progress. Stored in `$CEREBRO_HOME/blockers.md`.
+
+- `/cerebro blocked "<text>"` — record a new unresolved blocker
+- `/cerebro blocked` (no args) — list unresolved blockers with their index
+- `/cerebro blocked clear <n>` — mark blocker #n resolved (check the box; optionally append `— Resolved: <note>`)
+
+File format:
+```markdown
+# Blockers
+
+- [ ] 2026-06-01 — Waiting on API key from the infra team
+- [x] 2026-05-29 — Build fails on CI — Resolved: bumped Node to v22
+```
+If the file doesn't exist, create it with a `# Blockers` header. When `start` lists blockers, show only unresolved `[ ]` items.
+
+---
+
+## Mode: `pin`
+
+Pin items to surface every session, and set date-based reminders. Stored in `$CEREBRO_HOME/pins.md`.
+
+- `/cerebro pin "<text>"` — pin a persistent item (shows on every `start`)
+- `/cerebro pin "<text>" due:YYYY-MM-DD` — pin as a reminder with a due date
+- `/cerebro pin` (no args) — list all pins and reminders with their index
+- `/cerebro pin remove <n>` — unpin item #n
+
+File format:
+```markdown
+# Pins
+
+- 2026-06-01 — Review PR #42 before merging
+- 2026-06-01 — [due 2026-06-05] Renew the domain
+```
+If the file doesn't exist, create it with a `# Pins` header. In `start`, show all pins; for reminders (lines with `[due YYYY-MM-DD]`), flag any due today or overdue.
+
+---
+
+## Mode: `checkin`
+
+Lightweight in-session check-in. Stored per day at `$CEREBRO_HOME/checkins/YYYY-MM-DD.md`.
+
+- `/cerebro checkin` (no args) — ask: "What are you working on right now? Any wins or blockers?" then append the answer
+- `/cerebro checkin "<text>"` — append the text directly
+
+Append a timestamped entry:
+```markdown
+### HH:MM
+<text>
+```
+If the day's file doesn't exist, create it with YAML frontmatter (`type: checkin`, `created`, `tags`, `project`) followed by a `# Check-ins: YYYY-MM-DD` header. Always append — never overwrite. Respect private mode: if the session is private, do not write.
 
 ---
 
@@ -333,7 +415,7 @@ Show:
 
 ## Mode: `profile`
 
-With no arguments: show current profile (name, role, tone, experience, greeting style).
+With no arguments: show current profile (name, role, tone, greeting style).
 With arguments: update a specific field.
 - `/cerebro profile name "New Name"` — change name
 - `/cerebro profile tone concise` — change tone
