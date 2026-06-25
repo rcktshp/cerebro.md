@@ -28,6 +28,10 @@ cp "$SCRIPT_DIR/src/platform-defaults.json" "$CEREBRO_LOCAL/platform-defaults.js
 # Copy version
 cp "$SCRIPT_DIR/VERSION" "$CEREBRO_LOCAL/VERSION"
 
+# Copy MCP server
+cp "$SCRIPT_DIR/src/cerebro-mcp.py" "$CEREBRO_LOCAL/cerebro-mcp.py"
+chmod +x "$CEREBRO_LOCAL/cerebro-mcp.py"
+
 # ---------------------------------------------------------------------------
 # Resolve cerebro_home and kb_root — read from existing config if present,
 # else fall back to sensible defaults. Used to personalise the skill file.
@@ -160,11 +164,52 @@ fi
 # Clean up temp file
 rm -f "$SKILL_TMP"
 
+# ---------------------------------------------------------------------------
+# Claude Desktop — register MCP server so Claude chat gets Cerebro access
+# ---------------------------------------------------------------------------
+CLAUDE_DESKTOP_CONFIG=""
+if [ "$(uname)" = "Darwin" ]; then
+    CLAUDE_DESKTOP_CONFIG="$HOME/Library/Application Support/Claude/claude_desktop_config.json"
+elif [ "$(uname)" = "Linux" ]; then
+    CLAUDE_DESKTOP_CONFIG="$HOME/.config/Claude/claude_desktop_config.json"
+fi
+
+if [ -n "$CLAUDE_DESKTOP_CONFIG" ] && command -v python3 >/dev/null 2>&1; then
+    mkdir -p "$(dirname "$CLAUDE_DESKTOP_CONFIG")"
+    python3 - "$CLAUDE_DESKTOP_CONFIG" "$CEREBRO_LOCAL/cerebro-mcp.py" <<'PY'
+import json, sys, os
+config_path, mcp_script = sys.argv[1], sys.argv[2]
+
+# Load existing config or start fresh
+if os.path.exists(config_path):
+    try:
+        cfg = json.loads(open(config_path).read())
+    except Exception:
+        cfg = {}
+else:
+    cfg = {}
+
+cfg.setdefault("mcpServers", {})
+cfg["mcpServers"]["cerebro"] = {
+    "command": "python3",
+    "args": [mcp_script]
+}
+
+with open(config_path, "w") as f:
+    json.dump(cfg, f, indent=2)
+
+print(f"  MCP server registered in {config_path}")
+PY
+    installed_platforms="$installed_platforms Claude-Desktop"
+fi
+
 echo "Cerebro installed successfully!"
 echo ""
 echo "  Local config:  $CEREBRO_LOCAL/"
 echo "  Hook scripts:  $CEREBRO_LOCAL/hooks/"
+echo "  MCP server:    $CEREBRO_LOCAL/cerebro-mcp.py"
 echo "  Storage:       $CEREBRO_HOME_RESOLVED"
 echo "  Platforms:    $installed_platforms"
 echo ""
 echo "Run /cerebro in your AI assistant to start onboarding."
+echo "Restart Claude Desktop to activate the MCP server for Claude chat."
