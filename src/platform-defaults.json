@@ -34,5 +34,44 @@
     "hooks_supported": false,
     "hook_events": [],
     "detection_path": "~/.cline"
+  },
+  "gemini-cli": {
+    "name": "Gemini CLI",
+    "memory_path": "~/.gemini/GEMINI.md",
+    "commands_dir": "~/.gemini/commands",
+    "settings_path": "~/.gemini/settings.json",
+    "command_format": "toml",
+    "command_file": "cerebro.toml",
+    "arg_placeholder": "{{args}}",
+    "hooks_supported": false,
+    "hook_events": [],
+    "detection_path": "~/.gemini/settings.json",
+    "detection_note": "~/.gemini is shared with Google Antigravity; detect the standalone Gemini CLI by its top-level settings.json or GEMINI.md, not the directory alone."
+  },
+  "codex-cli": {
+    "name": "Codex CLI",
+    "memory_path": "~/.codex/AGENTS.md",
+    "commands_dir": "~/.codex/prompts",
+    "settings_path": "~/.codex/config.toml",
+    "command_format": "markdown",
+    "command_file": "cerebro.md",
+    "arg_placeholder": "$ARGUMENTS",
+    "hooks_supported": false,
+    "hook_events": [],
+    "detection_path": "~/.codex"
+  },
+  "antigravity": {
+    "name": "Google Antigravity",
+    "memory_path": null,
+    "memory_note": "No plain-text memory file; Antigravity uses proprietary knowledge/ and brain/ stores, so memory sync is skipped.",
+    "commands_dir": "~/.gemini/config/plugins/cerebro/skills/cerebro",
+    "settings_path": "~/.gemini/antigravity-cli/settings.json",
+    "command_format": "skill-plugin",
+    "command_file": "SKILL.md",
+    "arg_placeholder": "$ARGUMENTS",
+    "command_note": "Packaged as a plugin (plugin.json + skills/cerebro/SKILL.md). The skill is model-activated via its frontmatter description, not a literal /slash command.",
+    "hooks_supported": false,
+    "hook_events": [],
+    "detection_path": "~/.gemini/antigravity-cli"
   }
 }

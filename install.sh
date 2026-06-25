@@ -60,6 +60,64 @@ if [ -d "$HOME/.cline" ]; then
     installed_platforms="$installed_platforms Cline"
 fi
 
+# Codex CLI (custom prompts are plain markdown, like Claude Code)
+if [ -d "$HOME/.codex" ]; then
+    mkdir -p "$HOME/.codex/prompts"
+    cp "$SCRIPT_DIR/src/cerebro.md" "$HOME/.codex/prompts/cerebro.md"
+    installed_platforms="$installed_platforms Codex-CLI"
+fi
+
+# Gemini CLI (commands are TOML; wrap the markdown safely and swap the arg placeholder)
+# NOTE: ~/.gemini is shared with Google Antigravity, so detect the *standalone*
+# Gemini CLI by its own top-level settings.json / GEMINI.md, not the dir alone.
+if [ -f "$HOME/.gemini/settings.json" ] || [ -f "$HOME/.gemini/GEMINI.md" ]; then
+    mkdir -p "$HOME/.gemini/commands"
+    if command -v python3 >/dev/null 2>&1; then
+        python3 - "$SCRIPT_DIR/src/cerebro.md" "$HOME/.gemini/commands/cerebro.toml" <<'PY'
+import sys
+src, dst = sys.argv[1], sys.argv[2]
+md = open(src, encoding="utf-8").read().replace("$ARGUMENTS", "{{args}}")
+# Escape for a TOML basic multiline string: double backslashes, escape quotes
+# (so no literal """ can ever appear and close the string early).
+esc = md.replace("\\", "\\\\").replace('"', '\\"')
+with open(dst, "w", encoding="utf-8") as f:
+    f.write('description = "Cerebro — personal AI memory & session manager"\n')
+    f.write('prompt = """\n')
+    f.write(esc)
+    f.write('\n"""\n')
+PY
+        installed_platforms="$installed_platforms Gemini-CLI"
+    else
+        echo "  Skipping Gemini CLI: python3 is required to build its TOML command."
+    fi
+fi
+
+# Google Antigravity (skills are plugin-packaged + model-activated; no plain-text
+# memory file and no usable logging hooks, so it's commands-only/manual logging).
+if [ -d "$HOME/.gemini/antigravity-cli" ] || [ -d "$HOME/.gemini/antigravity" ]; then
+    AG_PLUGIN="$HOME/.gemini/config/plugins/cerebro"
+    AG_SKILL="$AG_PLUGIN/skills/cerebro"
+    mkdir -p "$AG_SKILL"
+    cat > "$AG_PLUGIN/plugin.json" <<'JSON'
+{
+  "name": "cerebro",
+  "version": "0.2.0",
+  "description": "Cerebro — personal AI memory & session manager",
+  "author": { "name": "Cerebro" },
+  "license": "MIT",
+  "keywords": ["memory", "sessions", "cerebro"]
+}
+JSON
+    {
+        printf -- '---\n'
+        printf 'name: cerebro\n'
+        printf 'description: "Cerebro — personal AI memory and session manager. ACTIVATE when the user types /cerebro or asks to start or end a session, capture notes, goals, blockers, pins, or manage their memory and activity history."\n'
+        printf -- '---\n\n'
+        cat "$SCRIPT_DIR/src/cerebro.md"
+    } > "$AG_SKILL/SKILL.md"
+    installed_platforms="$installed_platforms Antigravity"
+fi
+
 echo "Cerebro installed successfully!"
 echo ""
 echo "  Local config:  $CEREBRO_LOCAL/"

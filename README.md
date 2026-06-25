@@ -1,8 +1,8 @@
-# Cerebro
+# CEREBRO.md
 
 **Your AI assistant's memory.** Cerebro is a persistent memory and session management system that works across AI coding assistants. It remembers what you worked on, tracks your sessions, and builds a searchable knowledge base — all stored locally on your machine.
 
-Created by [Diego Martins](https://www.diegomartins.com)
+Created by [Diego Martins](https://www.diegomartins.com) *Personal project. Not affiliated with or endorsed by any employer.*
 
 ## Features
 
@@ -14,7 +14,7 @@ Created by [Diego Martins](https://www.diegomartins.com)
 - **Token & Timing Tracking** — Know how long you spend and what it costs
 - **Daily & Weekly Reviews** — Standups, digests, stats, streaks, flashbacks
 - **Handoffs** — Structured context docs to resume work in a new session or platform
-- **Multi-Platform** — Works with Claude Code, Cursor, Windsurf, and Cline
+- **Multi-Platform** — Works with Claude Code, Cursor, Windsurf, Cline, Codex CLI, Gemini CLI, and Google Antigravity
 - **Cross-OS** — macOS, Linux, and Windows
 - **Privacy First** — You own all your data. Full control over what's tracked. Anonymous and private modes available.
 - **Self-Updating** — `/cerebro update` pulls the latest version
@@ -77,6 +77,9 @@ All commands are invoked as `/cerebro <command>`. Commands marked *(v0.3)* are h
 | Cursor | Yes | Limited | Supported |
 | Windsurf | Yes | Manual only | Supported |
 | Cline | Yes | Manual only | Supported |
+| Codex CLI | Yes | Manual only | Supported |
+| Gemini CLI | Yes (TOML) | Manual only | Supported |
+| Google Antigravity | Yes (skill plugin) | Manual only | Supported |
 
 ## Privacy
 
@@ -116,8 +119,6 @@ Walks you through a clean removal with an option to export your data first.
 ## License
 
 MIT — Copyright (c) 2026 CEREBRO.md by Martins LLC dba Rocketship. See [LICENSE](LICENSE).
-
-For website terms of use, trademark policy, and other project policies, see [rocketship.xyz](https://www.rocketship.xyz).
 
 ## Open Core
 
