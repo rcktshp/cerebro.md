@@ -16,29 +16,31 @@ description: >
 
 # Cerebro Skill — v0.2.0
 
-Cerebro is Diego's persistent memory and knowledge system. All data lives in plain
-markdown files on his machine. Read and write those files directly — never ask
-Diego to run shell commands manually.
+Cerebro is a persistent memory and knowledge system for AI coding assistants. All
+data lives in plain markdown files. Read and write those files directly — never
+ask the user to run shell commands manually.
 
 ---
 
 ## Config
 
-Read `~/.cerebro/config.json` first whenever you don't have it in context.
+Read `~/.cerebro/config.json` first if you don't have it in context.
 
 Key fields:
-- `cerebro_home` — root of all Cerebro data (expand `~` to the full path)
-- `user.preferred_name` — how to address Diego
-- `knowledge_base_root` — root of research KBs
+- `cerebro_home` — root of all Cerebro data (expand `~` to the full absolute path)
+- `user.preferred_name` — how to address the user
+- `knowledge_base_root` — root of research knowledge bases
+- `platforms.<platform>.memory_path` — the active memory file for this platform
 
-**Expanded paths (Diego's machine):**
+**Installed paths (substituted at install time):**
 ```
-cerebro_home:      /Users/diegomartins/Library/CloudStorage/GoogleDrive-dpm0828@gmail.com/My Drive/00_Cerebro/00_Storage
-knowledge_base_root: /Users/diegomartins/Library/CloudStorage/GoogleDrive-dpm0828@gmail.com/My Drive/00_Cerebro/00_knowledge
-memory_file:       /Users/diegomartins/.claude/projects/-Users-diegomartins-Library-CloudStorage-GoogleDrive-dpm0828-gmail-com-My-Drive/memory/MEMORY.md
+cerebro_home:        {{CEREBRO_HOME}}
+knowledge_base_root: {{KB_ROOT}}
 ```
 
-> **Gotcha:** `cerebro_home` contains a space. Always quote it: `"$CEREBRO_HOME"`. Never pass bare `~` to file tools — expand to `/Users/diegomartins/` first.
+> **Gotcha:** `cerebro_home` may contain spaces (e.g. a Google Drive path). Always
+> quote it in shell commands: `"$CEREBRO_HOME"`. Never pass bare `~` to file tools
+> — expand to the full absolute path first.
 
 ---
 
@@ -68,7 +70,7 @@ $CEREBRO_HOME/
 ~/.cerebro/
   config.json            # all paths + privacy + platform settings
   VERSION                # 0.2.0
-  hooks/                 # log-prompt.py, log-stop.py, kb-autoprocess.py, session-autostart.py
+  hooks/                 # log-prompt.py, log-stop.py, kb-autoprocess.py
   session-map/           # session ID + .timer files
 ```
 
@@ -152,9 +154,9 @@ created: YYYY-MM-DD
 tags: []
 ---
 # <title>
-```<lang>
+` ` `<lang>
 <code>
-```
+` ` `
 ```
 
 ### decisions/YYYY-MM-DD-<slug>.md
@@ -217,7 +219,7 @@ last_active: YYYY-MM-DD
 
 ## When Capturing Something
 
-Write files directly — never ask Diego to run a command:
+Write files directly — never ask the user to run a command:
 
 | Trigger | Action |
 |---------|--------|
@@ -241,18 +243,18 @@ Use the correct file format from the layouts above. Create the file with the YAM
 
 ## When Reading Session History
 
-1. Read `activity-history.md` — primary journal
-2. List `sessions/` by modification time to find the latest
-3. Grep `sessions/` and `til/` and `decisions/` for keywords
+1. Read `$CEREBRO_HOME/activity-history.md` — primary journal
+2. List `$CEREBRO_HOME/sessions/` by modification time to find the latest
+3. Search `$CEREBRO_HOME/sessions/`, `til/`, and `decisions/` for keywords
 4. Read the specific session file for full detail
 
-Do this without being asked. When Diego says "what did I work on last week?" — just read the files and answer.
+Do this proactively — when the user asks "what did I work on last week?" just read the files and answer.
 
 ---
 
 ## When Running a /cerebro Command
 
-You are the implementation. Read the mode definition from `~/.claude/commands/cerebro.md` (or whichever platform's command file is active), then execute it using your available file and shell tools. Never tell Diego to run a command himself.
+You are the implementation. Read the mode definition from the platform's cerebro command file, then execute it using your available file and shell tools. Never tell the user to run a command themselves.
 
 ---
 
@@ -270,10 +272,10 @@ When ingesting a source into a KB's `src/`:
 
 Every session compounds: more pages → more links → more findable answers.
 
-### Health check triggers (`/cerebro research health`):
+### Health check (`/cerebro research health`):
 - Orphan pages — no inbound links
 - Stub pages — under 100 words
-- Contradictions — opposite claims in two pages about the same concept
+- Contradictions — opposite claims about the same concept
 - Stale pages — not updated in 90+ days
 
 ### Gap detection (`/cerebro research gaps`):
@@ -281,34 +283,40 @@ Every session compounds: more pages → more links → more findable answers.
 - Topics in multiple sources but thin wiki coverage (<200 words)
 - Suggest 3–5 article titles that would fill the gaps
 
+### Knowledge base structure:
+```
+{{KB_ROOT}}/
+  <topic-slug>/
+    src/            # raw source material (read-only inputs)
+    wiki/           # atomic concept pages with [[wikilinks]]
+      index.md      # one-line entry per concept page
+      queries/      # YYYY-MM-DD-<slug>.md answer files
+    CLAUDE.md       # schema and processing rules for this KB
+    learnings.md    # what worked/didn't after each session
+    .kb/
+      config.json   # { "topic": "...", "created": "YYYY-MM-DD" }
+      processed.json  # sources processed so far
+```
+
+List existing KBs: `ls "{{KB_ROOT}}/"`
+
 ---
 
 ## Privacy Rules
 
-Before writing anything, check `privacy` in config:
+Before writing anything, check `privacy` in `~/.cerebro/config.json`:
 - `session_recording: false` → don't write to `sessions/`
 - `activity_logging: false` → don't write to `activity-history.md`
-- `private_by_default: true` → confirm before writing anything
-
----
-
-## Knowledge Bases
-
-Root: `/Users/diegomartins/Library/CloudStorage/GoogleDrive-dpm0828@gmail.com/My Drive/00_Cerebro/00_knowledge`
-
-Each KB folder contains: `src/`, `wiki/`, `CLAUDE.md`, `learnings.md`, `.kb/config.json`, `.kb/processed.json`
-
-Known KBs:
-- `adobe-portfolio-deep-dive/` — built 2026-06-15
-- `salesforce-principal-pd/` — built 2026-06-15
+- `private_by_default: true` → confirm with the user before writing anything
 
 ---
 
 ## Gotchas
 
-- **Space in cerebro_home path** — always quote: `"$CEREBRO_HOME"`
-- **activity-history.md is append-only** — find the insertion point, never rewrite
+- **`cerebro_home` may contain spaces** — always quote: `"$CEREBRO_HOME"`
+- **Never use `~` in file tool paths** — expand to the full absolute path (read from config)
+- **activity-history.md is append-only** — find the insertion point, never rewrite the file
 - **Session filenames** — `YYYY-MM-DD-HHMMSS-<uuid-prefix>.md`, sort by mtime for latest
-- **Memory file path in config is stale** — use: `/Users/diegomartins/.claude/projects/-Users-diegomartins-Library-CloudStorage-GoogleDrive-dpm0828-gmail-com-My-Drive/memory/MEMORY.md`
+- **Memory file path** — read `platforms.<platform>.memory_path` from config; don't guess it
 - **Checkin files need YAML frontmatter** — create with the full header if the day's file doesn't exist yet
-- **Don't expand dates with shell commands in tool args** — compute `YYYY-MM-DD` yourself from today's date
+- **Don't use shell date expansion in tool args** — compute `YYYY-MM-DD` from today's date yourself

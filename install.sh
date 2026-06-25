@@ -7,6 +7,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CEREBRO_LOCAL="$HOME/.cerebro"
+CEREBRO_CMD="$SCRIPT_DIR/src/cerebro.md"
 
 echo "Installing Cerebro..."
 echo ""
@@ -27,47 +28,81 @@ cp "$SCRIPT_DIR/src/platform-defaults.json" "$CEREBRO_LOCAL/platform-defaults.js
 # Copy version
 cp "$SCRIPT_DIR/VERSION" "$CEREBRO_LOCAL/VERSION"
 
+# ---------------------------------------------------------------------------
+# Resolve cerebro_home and kb_root — read from existing config if present,
+# else fall back to sensible defaults. Used to personalise the skill file.
+# ---------------------------------------------------------------------------
+if [ -f "$CEREBRO_LOCAL/config.json" ] && command -v python3 >/dev/null 2>&1; then
+    CEREBRO_HOME_RESOLVED="$(python3 -c "
+import json, os
+cfg = json.load(open('$CEREBRO_LOCAL/config.json'))
+print(os.path.expanduser(cfg.get('cerebro_home', '~/Cerebro')))
+" 2>/dev/null || echo "$HOME/Cerebro")"
+    KB_ROOT_RESOLVED="$(python3 -c "
+import json, os
+cfg = json.load(open('$CEREBRO_LOCAL/config.json'))
+print(os.path.expanduser(cfg.get('knowledge_base_root', os.path.join(os.path.expanduser('~'), 'Cerebro', 'knowledge'))))
+" 2>/dev/null || echo "$HOME/Cerebro/knowledge")"
+else
+    CEREBRO_HOME_RESOLVED="$HOME/Cerebro"
+    KB_ROOT_RESOLVED="$HOME/Cerebro/knowledge"
+fi
+
+# Generate a personalised skill file with the user's real paths substituted in.
+# The source file uses {{CEREBRO_HOME}} and {{KB_ROOT}} as tokens.
+SKILL_TMP="$(mktemp)"
+sed \
+    -e "s|{{CEREBRO_HOME}}|$CEREBRO_HOME_RESOLVED|g" \
+    -e "s|{{KB_ROOT}}|$KB_ROOT_RESOLVED|g" \
+    "$SCRIPT_DIR/src/cerebro-skill.md" > "$SKILL_TMP"
+
+# Helper: copy the personalised skill to a platform's skill directory
+install_skill() {
+    local dest_dir="$1"
+    mkdir -p "$dest_dir"
+    cp "$SKILL_TMP" "$dest_dir/SKILL.md"
+}
+
+# ---------------------------------------------------------------------------
 # Detect and install into platforms
+# ---------------------------------------------------------------------------
 installed_platforms=""
 
 # Claude Code
 if [ -d "$HOME/.claude" ]; then
     mkdir -p "$HOME/.claude/commands"
-    cp "$SCRIPT_DIR/src/cerebro.md" "$HOME/.claude/commands/cerebro.md"
-    mkdir -p "$HOME/.claude/skills/cerebro"
-    cp "$SCRIPT_DIR/src/cerebro-skill.md" "$HOME/.claude/skills/cerebro/SKILL.md"
+    cp "$CEREBRO_CMD" "$HOME/.claude/commands/cerebro.md"
+    install_skill "$HOME/.claude/skills/cerebro"
     installed_platforms="$installed_platforms Claude-Code"
 fi
 
 # Cursor (commands + skills — uses same SKILL.md format as Claude Code)
 if [ -d "$HOME/.cursor" ]; then
     mkdir -p "$HOME/.cursor/commands"
-    cp "$SCRIPT_DIR/src/cerebro.md" "$HOME/.cursor/commands/cerebro.md"
-    mkdir -p "$HOME/.cursor/skills-cursor/cerebro"
-    cp "$SCRIPT_DIR/src/cerebro-skill.md" "$HOME/.cursor/skills-cursor/cerebro/SKILL.md"
+    cp "$CEREBRO_CMD" "$HOME/.cursor/commands/cerebro.md"
+    install_skill "$HOME/.cursor/skills-cursor/cerebro"
     installed_platforms="$installed_platforms Cursor"
 fi
 
 # Windsurf
 if [ -d "$HOME/.windsurf" ]; then
     mkdir -p "$HOME/.windsurf/commands"
-    cp "$SCRIPT_DIR/src/cerebro.md" "$HOME/.windsurf/commands/cerebro.md"
+    cp "$CEREBRO_CMD" "$HOME/.windsurf/commands/cerebro.md"
     installed_platforms="$installed_platforms Windsurf"
 fi
 
 # Cline
 if [ -d "$HOME/.cline" ]; then
     mkdir -p "$HOME/.cline/commands"
-    cp "$SCRIPT_DIR/src/cerebro.md" "$HOME/.cline/commands/cerebro.md"
+    cp "$CEREBRO_CMD" "$HOME/.cline/commands/cerebro.md"
     installed_platforms="$installed_platforms Cline"
 fi
 
 # Codex CLI (commands + skills — same SKILL.md format as Claude Code)
 if [ -d "$HOME/.codex" ]; then
     mkdir -p "$HOME/.codex/prompts"
-    cp "$SCRIPT_DIR/src/cerebro.md" "$HOME/.codex/prompts/cerebro.md"
-    mkdir -p "$HOME/.codex/skills/cerebro"
-    cp "$SCRIPT_DIR/src/cerebro-skill.md" "$HOME/.codex/skills/cerebro/SKILL.md"
+    cp "$CEREBRO_CMD" "$HOME/.codex/prompts/cerebro.md"
+    install_skill "$HOME/.codex/skills/cerebro"
     installed_platforms="$installed_platforms Codex-CLI"
 fi
 
@@ -77,7 +112,7 @@ fi
 if [ -f "$HOME/.gemini/settings.json" ] || [ -f "$HOME/.gemini/GEMINI.md" ]; then
     mkdir -p "$HOME/.gemini/commands"
     if command -v python3 >/dev/null 2>&1; then
-        python3 - "$SCRIPT_DIR/src/cerebro.md" "$HOME/.gemini/commands/cerebro.toml" <<'PY'
+        python3 - "$CEREBRO_CMD" "$HOME/.gemini/commands/cerebro.toml" <<'PY'
 import sys
 src, dst = sys.argv[1], sys.argv[2]
 md = open(src, encoding="utf-8").read().replace("$ARGUMENTS", "{{args}}")
@@ -117,15 +152,19 @@ JSON
         printf 'name: cerebro\n'
         printf 'description: "Cerebro — personal AI memory and session manager. ACTIVATE when the user types /cerebro or asks to start or end a session, capture notes, goals, blockers, pins, or manage their memory and activity history."\n'
         printf -- '---\n\n'
-        cat "$SCRIPT_DIR/src/cerebro.md"
+        cat "$CEREBRO_CMD"
     } > "$AG_SKILL/SKILL.md"
     installed_platforms="$installed_platforms Antigravity"
 fi
+
+# Clean up temp file
+rm -f "$SKILL_TMP"
 
 echo "Cerebro installed successfully!"
 echo ""
 echo "  Local config:  $CEREBRO_LOCAL/"
 echo "  Hook scripts:  $CEREBRO_LOCAL/hooks/"
+echo "  Storage:       $CEREBRO_HOME_RESOLVED"
 echo "  Platforms:    $installed_platforms"
 echo ""
 echo "Run /cerebro in your AI assistant to start onboarding."
