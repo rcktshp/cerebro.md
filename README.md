@@ -2,6 +2,8 @@
 
 **Your AI assistant's memory.** Cerebro is a persistent memory and session management system that works across AI coding assistants. It remembers what you worked on, tracks your sessions, and builds a searchable knowledge base — all stored locally on your machine.
 
+**Website:** [cerebro-md.vercel.app](https://cerebro-md.vercel.app)
+
 Created by [Diego Martins](https://www.diegomartins.com) *Personal project. Not affiliated with or endorsed by any employer.*
 
 ## Features
