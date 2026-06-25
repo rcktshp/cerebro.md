@@ -1,113 +1,120 @@
 ---
 name: cerebro
 description: >
-  Cerebro session manager — use when the user references their Cerebro history,
-  asks about past sessions, wants to capture something, run a Cerebro command,
-  or work with their knowledge base. Triggers on phrases like "what did I work
-  on", "check my history", "save this as a decision", "run cerebro", "my TILs",
-  "last session", "what are my goals", "add to inbox", "research mode".
+  Cerebro session manager — activate whenever the user references their Cerebro
+  data, session history, past work, or wants to capture something. Also activate
+  for any /cerebro command. Trigger phrases include: "what did I work on",
+  "check my history", "last session", "what are my goals", "what are my blockers",
+  "save this as a decision", "save this as a snippet", "add a TIL", "bookmark this",
+  "add to inbox", "check in", "pin this", "start my session", "end my session",
+  "run cerebro", "my TILs", "research mode", "create a knowledge base",
+  "new project", "what did I learn", "show my notes", "generate standup",
+  "write a handoff", "weekly digest", "show my streaks", "what's in my memory",
+  "search my history", "show my favorites", "archive old sessions",
+  "show my workspace", "create a template", "show my stats".
 ---
 
-# Cerebro Skill
+# Cerebro Skill — v0.2.0
 
-Cerebro is Diego's persistent memory system. All data lives in plain markdown files.
-You have direct read/write access — act on it with the tools you have (Read, Edit,
-Write, Bash), not by asking Diego to run commands manually.
+Cerebro is Diego's persistent memory and knowledge system. All data lives in plain
+markdown files on his machine. Read and write those files directly — never ask
+Diego to run shell commands manually.
+
+---
 
 ## Config
 
-Always read config first if you don't have it in context already:
+Read `~/.cerebro/config.json` first whenever you don't have it in context.
 
-```bash
-cat ~/.cerebro/config.json
+Key fields:
+- `cerebro_home` — root of all Cerebro data (expand `~` to the full path)
+- `user.preferred_name` — how to address Diego
+- `knowledge_base_root` — root of research KBs
+
+**Expanded paths (Diego's machine):**
+```
+cerebro_home:      /Users/diegomartins/Library/CloudStorage/GoogleDrive-dpm0828@gmail.com/My Drive/00_Cerebro/00_Storage
+knowledge_base_root: /Users/diegomartins/Library/CloudStorage/GoogleDrive-dpm0828@gmail.com/My Drive/00_Cerebro/00_knowledge
+memory_file:       /Users/diegomartins/.claude/projects/-Users-diegomartins-Library-CloudStorage-GoogleDrive-dpm0828-gmail-com-My-Drive/memory/MEMORY.md
 ```
 
-Key paths from config:
-- `cerebro_home` → where all data lives (expand `~` yourself — don't pass `~` to tools)
-- `user.preferred_name` → how to address Diego
-- `platforms.claude-code.memory_path` → the active memory file
+> **Gotcha:** `cerebro_home` contains a space. Always quote it: `"$CEREBRO_HOME"`. Never pass bare `~` to file tools — expand to `/Users/diegomartins/` first.
 
-Expanded `cerebro_home`:
-`/Users/diegomartins/Library/CloudStorage/GoogleDrive-dpm0828@gmail.com/My Drive/00_Cerebro/00_Storage`
+---
 
 ## Directory Layout
 
 ```
 $CEREBRO_HOME/
-  activity-history.md   # append-only session journal — NEVER overwrite, only append
-  goals.md              # checklist of active goals
-  blockers.md           # checklist of unresolved blockers
-  pins.md               # persistent reminders
-  inbox.md              # quick-capture triage queue
-  favorites.md          # favorited sessions/notes
-  memory-backup.md      # latest copy of platform memory file
-  sessions/             # per-session log files (YYYY-MM-DD-HHMMSS-<id>.md)
-  notes/                # daily notes (YYYY-MM-DD.md) and bookmarks.md
-  til/                  # Today I Learned (YYYY-MM-DD.md)
-  snippets/             # code snippets (<slug>.md)
-  decisions/            # ADR files (YYYY-MM-DD-<slug>.md)
-  checkins/             # in-session check-ins (YYYY-MM-DD.md)
-  reports/              # handoffs, digests, standups, changelogs
-  workspaces/           # named workspace contexts (<name>.md)
-  skills/               # user-created Cerebro skills
-  archive/              # archived old content (YYYY/ subfolders)
-  templates/            # reusable templates
+  activity-history.md    # append-only session journal — NEVER overwrite
+  goals.md               # [ ] active goals, [x] completed
+  blockers.md            # [ ] unresolved blockers, [x] resolved
+  pins.md                # persistent items + [due YYYY-MM-DD] reminders
+  inbox.md               # quick-capture triage queue
+  favorites.md           # favorited sessions/notes/decisions
+  memory-backup.md       # latest snapshot of platform memory
+  sessions/              # YYYY-MM-DD-HHMMSS-<id>.md
+  notes/                 # YYYY-MM-DD.md daily notes + bookmarks.md
+  til/                   # YYYY-MM-DD.md Today I Learned
+  snippets/              # <slug>.md code snippets
+  decisions/             # YYYY-MM-DD-<slug>.md ADR-style decisions
+  checkins/              # YYYY-MM-DD.md in-session check-ins
+  reports/               # handoffs, digests, standups, changelogs
+  workspaces/            # <name>.md named project contexts
+  templates/             # reusable markdown templates
+  archive/               # YYYY/ subdirs of archived old content
+  skills/                # user-created Cerebro skills
 
 ~/.cerebro/
-  config.json           # source of truth for all paths and settings
-  hooks/                # Python hook scripts (log-prompt.py, log-stop.py, etc.)
-  session-map/          # session ID files + .timer files
-  VERSION               # installed version
+  config.json            # all paths + privacy + platform settings
+  VERSION                # 0.2.0
+  hooks/                 # log-prompt.py, log-stop.py, kb-autoprocess.py, session-autostart.py
+  session-map/           # session ID + .timer files
 ```
 
-## How to Read Session History
+---
 
-```bash
-# Last 3 activity entries
-tail -80 "$CEREBRO_HOME/activity-history.md"
+## All 57 Commands — Quick Reference
 
-# Find sessions by keyword
-grep -r "keyword" "$CEREBRO_HOME/sessions/"
+| Category | Commands |
+|----------|----------|
+| **Session** | start, end, log, private |
+| **Capture** | note, til, snippet, decision, inbox, bookmark, pin |
+| **Focus** | goal, blocked, checkin, workspace, context |
+| **Search** | search, find, query, tag |
+| **Knowledge** | new-project, new-kb, research, memory, map, links, graph* |
+| **Review** | today, digest, review, changelog, flashback, stats, streaks, patterns* |
+| **Collaboration** | handoff, standup, team*, join*, share*, mention*, delegate*, push*, pull* |
+| **Automation** | template, alias*, watch* |
+| **System** | status, profile, consent, privacy, clean, update, setup, uninstall, export |
+| **Organization** | archive, fav, dedup* |
 
-# List session files by date
-ls -lt "$CEREBRO_HOME/sessions/" | head -20
+*v0.3 stub — explains what's coming, suggests best current alternative.
 
-# Read a specific session
-cat "$CEREBRO_HOME/sessions/<filename>"
-```
-
-## How to Append to Activity History
-
-Always append — never overwrite.
-
-```python
-# Check if today's heading exists
-grep -n "## $(date +%Y-%m-%d)" "$CEREBRO_HOME/activity-history.md"
-# If not found, append the heading first, then the bullet
-# If found, find the line and append after the existing bullets under it
-```
-
-Pattern for appending:
-```markdown
-## YYYY-MM-DD
-
-- **Summary bullet** — what happened, what's open
-```
+---
 
 ## File Formats
 
-### goals.md / blockers.md / pins.md / inbox.md
-Plain markdown checklists. `[ ]` = open, `[x]` = done.
+### activity-history.md — append-only
+```markdown
+## YYYY-MM-DD
+
+- **Session title** — what happened, open items
+```
+Always append. Find the right date heading and insert after existing bullets, or add a new heading.
+
+### goals.md / blockers.md / pins.md / inbox.md — checklists
 ```markdown
 # Goals
-- [ ] 2026-06-01 — Ship Cerebro v0.2.0
-- [x] 2026-05-20 — Write onboarding flow
+- [ ] YYYY-MM-DD — <item>
+- [x] YYYY-MM-DD — <item>
 ```
+Pins with reminders: `- YYYY-MM-DD — [due YYYY-MM-DD] <item>`
 
 ### notes/YYYY-MM-DD.md
 ```markdown
 # Notes: YYYY-MM-DD
-### HH:MM — <note text>
+### HH:MM — <text>
 ```
 
 ### til/YYYY-MM-DD.md
@@ -119,7 +126,20 @@ tags: []
 ---
 # TIL: YYYY-MM-DD
 ### HH:MM
-<learning text>
+<learning>
+```
+
+### checkins/YYYY-MM-DD.md
+```markdown
+---
+type: checkin
+created: YYYY-MM-DD
+tags: []
+project: <project>
+---
+# Check-ins: YYYY-MM-DD
+### HH:MM
+<text>
 ```
 
 ### snippets/<slug>.md
@@ -153,86 +173,142 @@ tags: []
 ## Consequences
 ```
 
-### Research KB (inside knowledge_base_root)
-```
-<topic-slug>/
-  src/          # raw source material (read-only inputs)
-  wiki/         # atomic concept pages with [[wikilinks]]
-    index.md    # one-line entry per concept page
-  CLAUDE.md     # schema and processing rules for this KB
-  learnings.md  # what worked/didn't after each session
-  .kb/
-    config.json   # { "topic": "...", "created": "YYYY-MM-DD" }
-    processed.json  # { "sources": { "<filename>": { "processed": "YYYY-MM-DD" } } }
+### notes/bookmarks.md
+```markdown
+# Bookmarks
+- YYYY-MM-DD — [<title>](<url>) `#tag1 #tag2`
 ```
 
-## When the User Asks About Their History
+### reports/handoff-YYYY-MM-DD-HHMM.md
+```markdown
+---
+type: handoff
+created: YYYY-MM-DD
+---
+# Handoff: YYYY-MM-DD HH:MM
 
-1. Read `activity-history.md` — it's the primary journal.
-2. For detail, look up the session file referenced in that entry.
-3. Search `til/`, `decisions/`, `snippets/` for related captures.
-4. Use grep across sessions/ for keyword search.
+## What's in Progress
+## Context (files, links, decisions)
+## Next Steps
+## Known Blockers
+## How to Pick This Up
+```
 
-Do this proactively — don't ask Diego to "run /cerebro search". Just do the search yourself and report what you find.
+### workspaces/<name>.md
+```markdown
+---
+type: workspace
+name: <name>
+created: YYYY-MM-DD
+last_active: YYYY-MM-DD
+---
+## Active Project
+## Pinned Context
+## Active Goals
+```
+
+### favorites.md
+```markdown
+# Favorites
+- YYYY-MM-DD — <type> — [<title>](<relative-path>)
+```
+
+---
 
 ## When Capturing Something
 
-Write it yourself using Edit/Write:
-- Note → append to `notes/$(date +%Y-%m-%d).md`
-- TIL → append to `til/$(date +%Y-%m-%d).md`
-- Decision → create `decisions/$(date +%Y-%m-%d)-<slug>.md`
-- Snippet → create `snippets/<slug>.md`
-- Bookmark → append to `notes/bookmarks.md`
-- Goal → append to `goals.md`
-- Blocker → append to `blockers.md`
-- Inbox item → append to `inbox.md`
+Write files directly — never ask Diego to run a command:
 
-Always use the correct file format (frontmatter + structure) from the layouts above.
+| Trigger | Action |
+|---------|--------|
+| Note | Append to `$CEREBRO_HOME/notes/YYYY-MM-DD.md` |
+| TIL | Append to `$CEREBRO_HOME/til/YYYY-MM-DD.md` |
+| Decision | Create `$CEREBRO_HOME/decisions/YYYY-MM-DD-<slug>.md` |
+| Snippet | Create `$CEREBRO_HOME/snippets/<slug>.md` |
+| Bookmark | Append to `$CEREBRO_HOME/notes/bookmarks.md` |
+| Goal | Append to `$CEREBRO_HOME/goals.md` |
+| Blocker | Append to `$CEREBRO_HOME/blockers.md` |
+| Pin | Append to `$CEREBRO_HOME/pins.md` |
+| Inbox | Append to `$CEREBRO_HOME/inbox.md` |
+| Check-in | Append to `$CEREBRO_HOME/checkins/YYYY-MM-DD.md` |
+| Handoff | Create `$CEREBRO_HOME/reports/handoff-YYYY-MM-DD-HHMM.md` |
+| Standup | Create `$CEREBRO_HOME/reports/standup-YYYY-MM-DD.md` |
+| Digest | Create `$CEREBRO_HOME/reports/digest-YYYY-MM-DD.md` |
 
-## When Running a Cerebro Command
+Use the correct file format from the layouts above. Create the file with the YAML frontmatter header if it doesn't exist yet.
 
-You are the implementation. When Diego says `/cerebro <command>`:
-- You read the `cerebro.md` slash command file for the mode definition
-- You execute it using your tools (Read, Edit, Write, Bash)
-- You don't tell Diego to run a shell command — you do the work
+---
 
-## Privacy Rules
+## When Reading Session History
 
-Always check `privacy` in config before writing:
-- `session_recording: false` → don't write session files
-- `activity_logging: false` → don't write to activity-history.md
-- `private_by_default: true` → confirm with Diego before writing anything
+1. Read `activity-history.md` — primary journal
+2. List `sessions/` by modification time to find the latest
+3. Grep `sessions/` and `til/` and `decisions/` for keywords
+4. Read the specific session file for full detail
 
-## Knowledge Base Root
+Do this without being asked. When Diego says "what did I work on last week?" — just read the files and answer.
 
-`/Users/diegomartins/Library/CloudStorage/GoogleDrive-dpm0828@gmail.com/My Drive/00_Cerebro/00_knowledge`
+---
 
-List existing KBs:
-```bash
-ls "$KB_ROOT/"
-```
+## When Running a /cerebro Command
 
-Active KBs (from past sessions):
-- `adobe-portfolio-deep-dive/` — built 2026-06-15
-- `salesforce-principal-pd/` — built 2026-06-15
+You are the implementation. Read the mode definition from `~/.claude/commands/cerebro.md` (or whichever platform's command file is active), then execute it using your available file and shell tools. Never tell Diego to run a command himself.
+
+---
 
 ## Research Mode — Processing Loop
 
 When ingesting a source into a KB's `src/`:
-1. Read the source fully (don't summarize prematurely)
-2. Identify atomic concepts — each gets its own `wiki/<concept>.md`
-3. Add `[[wikilinks]]` wherever concepts reference each other
-4. Update `wiki/index.md` with a one-line summary per new/updated page
-5. Mark source processed in `.kb/processed.json`
-6. Append to `learnings.md`: what was extracted, what linked, anything surprising
-7. If the user ran a query: write the answer to `wiki/queries/YYYY-MM-DD-<slug>.md`
 
-This compounds — every session adds pages, every page adds links, every query adds a findable answer.
+1. Read the source in full — don't summarize prematurely
+2. Extract atomic concepts — one `wiki/<concept>.md` per concept
+3. Add `[[wikilinks]]` wherever concepts reference each other
+4. Update `wiki/index.md` — one-line entry per new/updated page
+5. Mark source processed in `.kb/processed.json`
+6. Append to `learnings.md` — what was extracted, what linked, surprises
+7. If a query was run — write answer to `wiki/queries/YYYY-MM-DD-<slug>.md`
+
+Every session compounds: more pages → more links → more findable answers.
+
+### Health check triggers (`/cerebro research health`):
+- Orphan pages — no inbound links
+- Stub pages — under 100 words
+- Contradictions — opposite claims in two pages about the same concept
+- Stale pages — not updated in 90+ days
+
+### Gap detection (`/cerebro research gaps`):
+- `[[wikilinks]]` that have no target page yet
+- Topics in multiple sources but thin wiki coverage (<200 words)
+- Suggest 3–5 article titles that would fill the gaps
+
+---
+
+## Privacy Rules
+
+Before writing anything, check `privacy` in config:
+- `session_recording: false` → don't write to `sessions/`
+- `activity_logging: false` → don't write to `activity-history.md`
+- `private_by_default: true` → confirm before writing anything
+
+---
+
+## Knowledge Bases
+
+Root: `/Users/diegomartins/Library/CloudStorage/GoogleDrive-dpm0828@gmail.com/My Drive/00_Cerebro/00_knowledge`
+
+Each KB folder contains: `src/`, `wiki/`, `CLAUDE.md`, `learnings.md`, `.kb/config.json`, `.kb/processed.json`
+
+Known KBs:
+- `adobe-portfolio-deep-dive/` — built 2026-06-15
+- `salesforce-principal-pd/` — built 2026-06-15
+
+---
 
 ## Gotchas
 
-- **`cerebro_home` contains a space** (Google Drive path). Always quote it in Bash: `"$CEREBRO_HOME"`.
-- **Never use `~` in tool paths** — expand to `/Users/diegomartins/` explicitly.
-- **activity-history.md is append-only.** Find the right insertion point; don't rewrite the file.
-- **Session files are named** `YYYY-MM-DD-HHMMSS-<uuid-prefix>.md` — list by mtime to find the latest.
-- **The memory file path in config is stale** — the correct path is `/Users/diegomartins/.claude/projects/-Users-diegomartins-Library-CloudStorage-GoogleDrive-dpm0828-gmail-com-My-Drive/memory/MEMORY.md`. Use that path for memory backup, not the one in config.json.
+- **Space in cerebro_home path** — always quote: `"$CEREBRO_HOME"`
+- **activity-history.md is append-only** — find the insertion point, never rewrite
+- **Session filenames** — `YYYY-MM-DD-HHMMSS-<uuid-prefix>.md`, sort by mtime for latest
+- **Memory file path in config is stale** — use: `/Users/diegomartins/.claude/projects/-Users-diegomartins-Library-CloudStorage-GoogleDrive-dpm0828-gmail-com-My-Drive/memory/MEMORY.md`
+- **Checkin files need YAML frontmatter** — create with the full header if the day's file doesn't exist yet
+- **Don't expand dates with shell commands in tool args** — compute `YYYY-MM-DD` yourself from today's date

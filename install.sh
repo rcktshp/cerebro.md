@@ -39,10 +39,12 @@ if [ -d "$HOME/.claude" ]; then
     installed_platforms="$installed_platforms Claude-Code"
 fi
 
-# Cursor
+# Cursor (commands + skills — uses same SKILL.md format as Claude Code)
 if [ -d "$HOME/.cursor" ]; then
     mkdir -p "$HOME/.cursor/commands"
     cp "$SCRIPT_DIR/src/cerebro.md" "$HOME/.cursor/commands/cerebro.md"
+    mkdir -p "$HOME/.cursor/skills-cursor/cerebro"
+    cp "$SCRIPT_DIR/src/cerebro-skill.md" "$HOME/.cursor/skills-cursor/cerebro/SKILL.md"
     installed_platforms="$installed_platforms Cursor"
 fi
 
@@ -60,10 +62,12 @@ if [ -d "$HOME/.cline" ]; then
     installed_platforms="$installed_platforms Cline"
 fi
 
-# Codex CLI (custom prompts are plain markdown, like Claude Code)
+# Codex CLI (commands + skills — same SKILL.md format as Claude Code)
 if [ -d "$HOME/.codex" ]; then
     mkdir -p "$HOME/.codex/prompts"
     cp "$SCRIPT_DIR/src/cerebro.md" "$HOME/.codex/prompts/cerebro.md"
+    mkdir -p "$HOME/.codex/skills/cerebro"
+    cp "$SCRIPT_DIR/src/cerebro-skill.md" "$HOME/.codex/skills/cerebro/SKILL.md"
     installed_platforms="$installed_platforms Codex-CLI"
 fi
 
