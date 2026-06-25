@@ -34,6 +34,8 @@ installed_platforms=""
 if [ -d "$HOME/.claude" ]; then
     mkdir -p "$HOME/.claude/commands"
     cp "$SCRIPT_DIR/src/cerebro.md" "$HOME/.claude/commands/cerebro.md"
+    mkdir -p "$HOME/.claude/skills/cerebro"
+    cp "$SCRIPT_DIR/src/cerebro-skill.md" "$HOME/.claude/skills/cerebro/SKILL.md"
     installed_platforms="$installed_platforms Claude-Code"
 fi
 

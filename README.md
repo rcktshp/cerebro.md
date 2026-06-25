@@ -2,13 +2,18 @@
 
 **Your AI assistant's memory.** Cerebro is a persistent memory and session management system that works across AI coding assistants. It remembers what you worked on, tracks your sessions, and builds a searchable knowledge base — all stored locally on your machine.
 
+Created by [Diego Martins](https://www.diegomartins.com)
+
 ## Features
 
 - **Session Recording** — Automatically logs every prompt and response
 - **Activity History** — An append-only journal that builds across all your sessions
-- **Knowledge Capture** — Notes, decisions, snippets, TILs, all searchable
+- **Knowledge Capture** — Notes, decisions, snippets, TILs, bookmarks — all searchable
+- **Research Mode** — Ingest external sources into a self-organizing wiki with `[[wikilinks]]`, health checks, gap detection, and Q&A that files back into the wiki
 - **Memory Backup** — Syncs your platform memory to safe storage
 - **Token & Timing Tracking** — Know how long you spend and what it costs
+- **Daily & Weekly Reviews** — Standups, digests, stats, streaks, flashbacks
+- **Handoffs** — Structured context docs to resume work in a new session or platform
 - **Multi-Platform** — Works with Claude Code, Cursor, Windsurf, and Cline
 - **Cross-OS** — macOS, Linux, and Windows
 - **Privacy First** — You own all your data. Full control over what's tracked. Anonymous and private modes available.
@@ -17,8 +22,8 @@
 ## Quick Install
 
 ```bash
-git clone https://github.com/yourusername/cerebro.git
-cd cerebro
+git clone https://github.com/rcktshp/cerebro.md.git
+cd cerebro.md
 bash install.sh
 ```
 
@@ -55,14 +60,14 @@ You start a new session
 | **Capture** | `note`, `til`, `snippet`, `decision`, `inbox`, `bookmark`, `pin` |
 | **Focus** | `goal`, `blocked`, `checkin`, `workspace`, `context` |
 | **Search** | `search`, `find`, `query`, `tag` |
-| **Knowledge** | `memory`, `map`, `graph`, `links` |
+| **Knowledge** | `new-project`, `new-kb`, `research`, `memory`, `map`, `graph`, `links` |
 | **Review** | `today`, `digest`, `review`, `changelog`, `flashback`, `stats`, `streaks`, `patterns` |
 | **Collaboration** | `team`, `join`, `share`, `handoff`, `standup`, `mention`, `delegate`, `push`, `pull` |
 | **Automation** | `template`, `alias`, `watch` |
 | **System** | `status`, `profile`, `consent`, `privacy`, `clean`, `update`, `setup`, `uninstall`, `export` |
 | **Organization** | `archive`, `fav`, `dedup` |
 
-All commands are invoked as `/cerebro <command>`.
+All commands are invoked as `/cerebro <command>`. Commands marked *(v0.3)* are honest stubs — they explain what's coming and suggest the best current alternative.
 
 ## Platform Support
 
