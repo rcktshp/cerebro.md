@@ -9,15 +9,16 @@ Created by [Diego Martins](https://www.diegomartins.com) *Personal project. Not 
 - **Session Recording** — Automatically logs every prompt and response
 - **Activity History** — An append-only journal that builds across all your sessions
 - **Knowledge Capture** — Notes, decisions, snippets, TILs, bookmarks — all searchable
-- **Research Mode** — Ingest external sources into a self-organizing wiki with `[[wikilinks]]`, health checks, gap detection, and Q&A that files back into the wiki
+- **Research Mode** — Ingest external sources into a self-organizing wiki with `[[wikilinks]]`, health checks, gap detection, and Q&A that files back into the wiki so every exploration compounds
+- **MCP Server** — Built-in MCP server gives Claude Desktop, Cursor, Codex CLI, Antigravity, Windsurf, and Cline full read/write access to your Cerebro data in chat UIs — not just coding sessions
+- **Skill File** — Teaches Claude Code, Cursor, and Codex CLI to navigate your Cerebro data natively, so your AI can read history and capture notes without being asked
 - **Memory Backup** — Syncs your platform memory to safe storage
 - **Token & Timing Tracking** — Know how long you spend and what it costs
 - **Daily & Weekly Reviews** — Standups, digests, stats, streaks, flashbacks
 - **Handoffs** — Structured context docs to resume work in a new session or platform
-- **Multi-Platform** — Works with Claude Code, Cursor, Windsurf, Cline, Codex CLI, Gemini CLI, and Google Antigravity
+- **Multi-Platform** — Works with Claude Code, Claude Desktop, Cursor, Windsurf, Cline, Codex CLI, Gemini CLI, and Google Antigravity
 - **Cross-OS** — macOS, Linux, and Windows
 - **Privacy First** — You own all your data. Full control over what's tracked. Anonymous and private modes available.
-- **Self-Updating** — `/cerebro update` pulls the latest version
 
 ## Quick Install
 
@@ -60,26 +61,46 @@ You start a new session
 | **Capture** | `note`, `til`, `snippet`, `decision`, `inbox`, `bookmark`, `pin` |
 | **Focus** | `goal`, `blocked`, `checkin`, `workspace`, `context` |
 | **Search** | `search`, `find`, `query`, `tag` |
-| **Knowledge** | `new-project`, `new-kb`, `research`, `memory`, `map`, `graph`, `links` |
-| **Review** | `today`, `digest`, `review`, `changelog`, `flashback`, `stats`, `streaks`, `patterns` |
-| **Collaboration** | `team`, `join`, `share`, `handoff`, `standup`, `mention`, `delegate`, `push`, `pull` |
-| **Automation** | `template`, `alias`, `watch` |
+| **Knowledge** | `new-project`, `new-kb`, `research`, `memory`, `map`, `graph`*, `links` |
+| **Review** | `today`, `digest`, `review`, `changelog`, `flashback`, `stats`, `streaks`, `patterns`* |
+| **Collaboration** | `handoff`, `standup`, `team`*, `join`*, `share`*, `mention`*, `delegate`*, `push`*, `pull`* |
+| **Automation** | `template`, `alias`*, `watch`* |
 | **System** | `status`, `profile`, `consent`, `privacy`, `clean`, `update`, `setup`, `uninstall`, `export` |
-| **Organization** | `archive`, `fav`, `dedup` |
+| **Organization** | `archive`, `fav`, `dedup`* |
 
-All commands are invoked as `/cerebro <command>`. Commands marked *(v0.3)* are honest stubs — they explain what's coming and suggest the best current alternative.
+All commands are invoked as `/cerebro <command>`. Commands marked * are v0.3 stubs — they explain what's coming and suggest the best current alternative.
 
 ## Platform Support
 
-| Platform | Slash Commands | Auto-Logging (Hooks) | Status |
-|----------|---------------|---------------------|--------|
-| Claude Code | Yes | Full | Supported |
-| Cursor | Yes | Limited | Supported |
-| Windsurf | Yes | Manual only | Supported |
-| Cline | Yes | Manual only | Supported |
-| Codex CLI | Yes | Manual only | Supported |
-| Gemini CLI | Yes (TOML) | Manual only | Supported |
-| Google Antigravity | Yes (skill plugin) | Manual only | Supported |
+| Platform | Commands | Auto-Log | Skill | MCP |
+|----------|----------|----------|-------|-----|
+| Claude Code | ✅ | ✅ hooks | ✅ | — |
+| Claude Desktop | — | — | — | ✅ |
+| Cursor | ✅ | — | ✅ | ✅ |
+| Windsurf | ✅ | — | — | ✅ |
+| Cline | ✅ | — | — | ✅ |
+| Codex CLI | ✅ | — | ✅ | ✅ |
+| Gemini CLI | ✅ TOML | — | — | — |
+| Google Antigravity | ✅ plugin | — | — | ✅ |
+
+- **Commands** — `/cerebro` slash command installed
+- **Auto-Log** — sessions recorded automatically via hooks (no manual `/cerebro log` needed)
+- **Skill** — Cerebro context loads proactively; your AI can read history and capture notes without being asked
+- **MCP** — full read/write access to your Cerebro data in the app's chat UI via the built-in MCP server
+
+## MCP Server
+
+The Cerebro MCP server (`~/.cerebro/cerebro-mcp.py`) gives any MCP-compatible client full access to your Cerebro data through five tools:
+
+| Tool | What it does |
+|------|-------------|
+| `cerebro_config` | Returns your paths, user prefs, and privacy settings |
+| `cerebro_read` | Reads any file from your Cerebro data directory |
+| `cerebro_list` | Lists files in a Cerebro directory (sortable by date) |
+| `cerebro_write` | Appends or writes files (enforces append-only for history/notes) |
+| `cerebro_search` | Searches all `.md` files for a keyword with context lines |
+
+`install.sh` registers it automatically in each platform's MCP config — no manual setup needed.
 
 ## Privacy
 
@@ -98,14 +119,14 @@ Everything lives in two places:
 
 | Location | What's there |
 |----------|-------------|
-| `~/.cerebro/` | Config, hooks, session map (~15 KB) |
+| `~/.cerebro/` | Config, hooks, MCP server, session map (~20 KB) |
 | `~/Cerebro/` (or your chosen path) | Sessions, notes, history, knowledge |
 
-No databases. No background processes. No network calls (except version check). Just markdown files and JSON.
+No databases. No background processes. No network calls at runtime. Just markdown files and JSON.
 
 ## Requirements
 
-- **Python 3** (for hook scripts — standard library only, no pip installs)
+- **Python 3** (for hook scripts and MCP server — standard library only, no pip installs)
 - macOS, Linux, or Windows
 
 ## Uninstall

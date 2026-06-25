@@ -50,9 +50,24 @@
 ### Planned for v0.3 (honest stubs)
 `graph`, `patterns`, `alias`, `watch`, `dedup`, and the full team/collaboration suite (`team`, `join`, `share`, `mention`, `delegate`, `push`, `pull`) — each mode explains what's coming and suggests the best current alternative.
 
+### MCP Server
+- **`src/cerebro-mcp.py`** — built-in MCP server (pure Python 3.8+ stdlib, no pip) giving any MCP-compatible client full read/write access to your Cerebro data via five tools: `cerebro_config`, `cerebro_read`, `cerebro_list`, `cerebro_write`, `cerebro_search`
+- `install.sh` now registers the MCP server automatically in all supported platform configs:
+  - Claude Desktop (`claude_desktop_config.json`, `mcpServers` schema)
+  - Cursor (`~/.cursor/mcp.json`, `mcpServers` schema)
+  - Google Antigravity (`~/.gemini/antigravity/mcp_config.json`, `mcpServers` schema)
+  - VS Code / Windsurf / Cline (`~/Library/Application Support/Code/User/mcp.json`, `servers` + `type:stdio` schema)
+  - Codex CLI (`~/.codex/config.toml`, TOML `[mcp_servers.cerebro]` block)
+
+### Skill File
+- **`src/cerebro-skill.md`** — teaches AI assistants to navigate Cerebro data formats, read session history, capture content, and run commands natively without being asked
+- Deployed to 3 platforms: Claude Code (`~/.claude/skills/cerebro/`), Cursor (`~/.cursor/skills-cursor/cerebro/`), Codex CLI (`~/.codex/skills/cerebro/`)
+- **Portable** — uses `{{CEREBRO_HOME}}` / `{{KB_ROOT}}` tokens in the repo; `install.sh` substitutes the user's real paths via `sed` at install time so every user gets a personalized copy
+- Full trigger phrase list covering all 57 commands, all capture types (including `checkin`, `pin`, `handoff`, `standup`, `digest`)
+
 ### Other
 - **Research mode** (`/cerebro research`) — full wiki pipeline: source ingestion, concept extraction, `[[wikilinks]]`, health checks, gap detection, and query-answer filing. Every exploration compounds the wiki.
-- **Skill file** (`src/cerebro-skill.md`) — teaches Claude Code to navigate Cerebro data formats, read session history, capture content, and run commands natively. Installed to `~/.claude/skills/cerebro/SKILL.md`.
+- **Claude Desktop** added as an 8th supported platform (MCP only — no slash command needed)
 - **Version** bumped to 0.2.0
 
 ---
